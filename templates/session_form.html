@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if mode == 'edit' else 'New' }} Quest Session — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-card auth-card--form">
+  <h1 class="font-heading mb-1 form-title">
+    {{ 'Edit Quest Session' if mode == 'edit' else 'Schedule a Quest Session' }}
+  </h1>
+  {% if mode == 'edit' %}
+    <p class="form-hint mb-4">{{ session.title }} — editable because no adventurer has joined yet.</p>
+  {% else %}
+    <p class="form-hint mb-4">The system prevents two sessions overlapping at the same location.</p>
+  {% endif %}
+
+  <form method="POST"
+        action="{{ url_for('edit_session', session_id=session.id) if mode == 'edit' else url_for('new_session') }}">
+
+    {% if mode == 'create' %}
+    <div class="mb-3">
+      <label for="quest_id" class="form-label">Quest</label>
+      <select class="form-select {% if errors.quest_id %}is-invalid{% endif %}" id="quest_id" name="quest_id" required>
+        <option value="">Select a quest…</option>
+        {% for q in quests %}
+          <option value="{{ q.id }}" {% if form_data.get('quest_id')|string == q.id|string %}selected{% endif %}>{{ q.title }}</option>
+        {% endfor %}
+      </select>
+      {% if errors.quest_id %}<div class="invalid-feedback d-block">{{ errors.quest_id }}</div>{% endif %}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+      <label for="day" class="form-label">Day</label>
+      <select class="form-select {% if errors.day %}is-invalid{% endif %}" id="day" name="day" required>
+        <option value="">Select a day…</option>
+        {% for d in days %}
+          <option value="{{ d }}" {% if form_data.get('day') == d %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+      {% if errors.day %}<div class="invalid-feedback d-block">{{ errors.day }}</div>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="start_time" class="form-label">Start time</label>
+      <input type="time" class="form-control {% if errors.start_time %}is-invalid{% endif %}"
+             id="start_time" name="start_time" required value="{{ form_data.get('start_time', '') }}">
+      {% if errors.start_time %}<div class="invalid-feedback d-block">{{ errors.start_time }}</div>{% endif %}
+    </div>
+
+    <div class="mb-4">
+      <label for="location_id" class="form-label">Location</label>
+      <select class="form-select {% if errors.location_id %}is-invalid{% endif %}" id="location_id" name="location_id" required>
+        <option value="">Select a location…</option>
+        {% for l in locations %}
+          <option value="{{ l.id }}" {% if form_data.get('location_id')|string == l.id|string %}selected{% endif %}>{{ l.name }}</option>
+        {% endfor %}
+      </select>
+      {% if errors.location_id %}<div class="invalid-feedback d-block">{{ errors.location_id }}</div>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-accent w-100">
+      {{ 'Save changes' if mode == 'edit' else 'Schedule session' }}
+    </button>
+  </form>
+</div>
+{% endblock %}

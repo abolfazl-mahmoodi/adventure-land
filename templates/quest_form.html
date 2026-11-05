@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}New Quest — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-card auth-card--form">
+  <h1 class="font-heading mb-1 form-title">Create a New Quest</h1>
+  <p class="form-hint mb-4">Once created, a quest's details cannot be changed — only its sessions can be scheduled or edited.</p>
+
+  <form method="POST" action="{{ url_for('new_quest') }}" enctype="multipart/form-data">
+    <div class="mb-3">
+      <label for="title" class="form-label">Quest title</label>
+      <input type="text" class="form-control {% if errors.title %}is-invalid{% endif %}"
+             id="title" name="title" required maxlength="120" value="{{ form_data.get('title', '') }}">
+      {% if errors.title %}<div class="invalid-feedback d-block">{{ errors.title }}</div>{% endif %}
+    </div>
+
+    <div class="row">
+      <div class="col-6 mb-3">
+        <label for="quest_type_id" class="form-label">Quest type</label>
+        <select class="form-select {% if errors.quest_type_id %}is-invalid{% endif %}" id="quest_type_id" name="quest_type_id" required>
+          <option value="">Select a quest type…</option>
+          {% for t in quest_types %}
+            <option value="{{ t.id }}" {% if form_data.get('quest_type_id')|string == t.id|string %}selected{% endif %}>{{ t.name }}</option>
+          {% endfor %}
+        </select>
+        {% if errors.quest_type_id %}<div class="invalid-feedback d-block">{{ errors.quest_type_id }}</div>{% endif %}
+      </div>
+      <div class="col-6 mb-3">
+        <label for="difficulty_id" class="form-label">Difficulty</label>
+        <select class="form-select {% if errors.difficulty_id %}is-invalid{% endif %}" id="difficulty_id" name="difficulty_id" required>
+          <option value="">Select a difficulty…</option>
+          {% for d in difficulties %}
+            <option value="{{ d.id }}" {% if form_data.get('difficulty_id')|string == d.id|string %}selected{% endif %}>{{ d.name }}</option>
+          {% endfor %}
+        </select>
+        {% if errors.difficulty_id %}<div class="invalid-feedback d-block">{{ errors.difficulty_id }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="duration_minutes" class="form-label">Duration (minutes)</label>
+      <input type="number" class="form-control {% if errors.duration_minutes %}is-invalid{% endif %}"
+             id="duration_minutes" name="duration_minutes" required min="1" step="1"
+             value="{{ form_data.get('duration_minutes', '') }}">
+      {% if errors.duration_minutes %}<div class="invalid-feedback d-block">{{ errors.duration_minutes }}</div>{% endif %}
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea class="form-control {% if errors.description %}is-invalid{% endif %}"
+                id="description" name="description" rows="3" required maxlength="2000">{{ form_data.get('description', '') }}</textarea>
+      {% if errors.description %}<div class="invalid-feedback d-block">{{ errors.description }}</div>{% endif %}
+    </div>
+
+    <div class="mb-4">
+      <label for="image" class="form-label">Promotional image</label>
+      <input type="file" class="form-control {% if errors.image %}is-invalid{% endif %}"
+             id="image" name="image" accept=".jpg,.jpeg,.png,.gif,.webp" required>
+      {% if errors.image %}<div class="invalid-feedback d-block">{{ errors.image }}</div>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-accent w-100">Create Quest</button>
+  </form>
+</div>
+{% endblock %}

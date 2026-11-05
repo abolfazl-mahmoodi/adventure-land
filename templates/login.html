@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Log in — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+  <h1 class="font-heading text-center mb-1 auth-title">Welcome Back</h1>
+  <p class="text-center form-hint mb-4">Log in to join quests or manage the guild.</p>
+
+  <form method="POST" action="{{ url_for('login') }}">
+    <div class="mb-3">
+      <label for="username" class="form-label">Username or email</label>
+      <input type="text" class="form-control {% if errors.username %}is-invalid{% endif %}"
+             id="username" name="username" required
+             value="{{ form_data.get('username', '') }}" autofocus>
+      {% if errors.username %}<div class="invalid-feedback d-block">{{ errors.username }}</div>{% endif %}
+    </div>
+
+    <div class="mb-4">
+      <label for="password" class="form-label">Password</label>
+      <input type="password" class="form-control {% if errors.password %}is-invalid{% endif %}"
+             id="password" name="password" required>
+      {% if errors.password %}<div class="invalid-feedback d-block">{{ errors.password }}</div>{% endif %}
+    </div>
+
+    <button type="submit" class="btn btn-accent w-100">Log in</button>
+  </form>
+
+  <p class="text-center form-hint mt-3 mb-0">
+    New to the guild? <a href="{{ url_for('signup') }}">Sign up</a>
+  </p>
+</div>
+{% endblock %}

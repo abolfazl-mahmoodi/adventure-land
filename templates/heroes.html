@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Heroes — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<h1 class="section-title">The Heroes of {{ guild_name }}</h1>
+<p class="form-hint mb-4 text-measure">
+  Every quest begins with a Core Party — a Warrior, a Mage, and a Healer. Certain quest types
+  also unlock a specialist hero suited to that kind of adventure.
+</p>
+
+<h2 class="font-heading mb-3 subsection-title">Core Party</h2>
+{% for c in core_characters %}
+  <div class="row g-0 hero-row {% if loop.index0 % 2 == 1 %}flex-row-reverse{% endif %}">
+    <div class="col-4">
+      <img src="{{ url_for('static', filename='images/characters/' + c.image_filename) }}"
+           alt="{{ c.name }}" class="hero-row__image">
+    </div>
+    <div class="col-8">
+      <div class="hero-row__body">
+        <span class="pill pill-role mb-2 pill-fit">{{ c.title }}</span>
+        <h3 class="hero-row__title">{{ c.name }}</h3>
+        <p class="form-hint mb-2">{{ c.identity }}</p>
+        {% if c.backstory %}<p class="mb-0">{{ c.backstory }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+{% endfor %}
+
+<h2 class="font-heading mb-3 mt-5 subsection-title">Quest-Type Specialists</h2>
+{% for c in bonus_characters %}
+  <div class="row g-0 hero-row {% if loop.index0 % 2 == 1 %}flex-row-reverse{% endif %}">
+    <div class="col-4">
+      <img src="{{ url_for('static', filename='images/characters/' + c.image_filename) }}"
+           alt="{{ c.name }}" class="hero-row__image">
+    </div>
+    <div class="col-8">
+      <div class="hero-row__body">
+        <div class="d-flex gap-2 mb-2">
+          <span class="pill pill-type">{{ c.quest_type_name }}</span>
+          <span class="pill pill-role">{{ c.title }}</span>
+        </div>
+        <h3 class="hero-row__title">{{ c.name }}</h3>
+        <p class="form-hint mb-2">{{ c.identity }}</p>
+        {% if c.backstory %}<p class="mb-0">{{ c.backstory }}</p>{% endif %}
+      </div>
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}

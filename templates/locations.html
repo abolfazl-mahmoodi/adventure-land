@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Locations — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<h1 class="section-title">Locations</h1>
+<p class="form-hint mb-4 text-measure">
+  Three realms make up this week's guild activity. Each shapes the feel of every quest set within it.
+</p>
+
+{% for entry in locations_with_quests %}
+  {% set loc = entry.location %}
+  <div class="location-card mb-3">
+    <img src="{{ url_for('static', filename='images/locations/' + loc.image_filename) }}"
+         alt="{{ loc.name }}" class="location-card__image">
+    <div class="location-card__body">
+      <h2 class="hero-row__title" id="location-{{ loc.id }}">{{ loc.name }}</h2>
+      <p class="form-hint">{{ loc.tagline }}</p>
+      <p class="location-desc">{{ loc.description }}</p>
+
+      {% if entry.quests %}
+      <h3 class="hero-row__title hero-row__title--xs mt-4 mb-2">Quests set here</h3>
+      <div class="row row-cols-3 g-3">
+        {% for e in entry.quests %}
+          {% set q = e.quest %}
+          <div class="col">
+            <a href="{{ url_for('session_detail', session_id=e.session_id) if e.session_id else url_for('quest_board') }}" class="text-decoration-none">
+              <article class="quest-card">
+                <img class="quest-card__image" src="{{ url_for('static', filename='images/quests/' + q.image_filename) }}" alt="{{ q.title }}">
+                <div class="quest-card__body">
+                  <div class="quest-card__meta">
+                    <span class="pill pill-type">{{ q.quest_type }}</span>
+                    <span class="pill pill-difficulty">{{ q.difficulty }}</span>
+                  </div>
+                  <h4 class="quest-card__title">{{ q.title }}</h4>
+                </div>
+              </article>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+{% endfor %}
+{% endblock %}

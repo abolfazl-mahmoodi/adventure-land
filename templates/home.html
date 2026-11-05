@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+{% block title %}{{ guild_name }} — {{ guild_tagline }}{% endblock %}
+
+{% block content %}
+<div class="hero-banner">
+  <img src="{{ url_for('static', filename='images/locations/fallen_city.jpg') }}" alt="" class="hero-banner__bg">
+  <div class="hero-banner__content">
+    <p class="hero-banner__eyebrow"><span aria-hidden="true">&#10022;</span> The weekly guild board</p>
+    <p class="hero-banner__tagline">{{ guild_tagline }}.</p>
+    <p class="hero-banner__sub">
+      A guild board for a fictional week of fantasy quests — browse sessions across Vaelthorn,
+      Eldoria, and the Legacy Dungeons, then reserve your party's place.
+    </p>
+    {% if not current_user.is_authenticated %}
+      <a href="{{ url_for('signup') }}" class="btn btn-accent mt-3">Join the Guild — it's free</a>
+    {% else %}
+      <a href="{{ url_for('quest_board') }}" class="btn btn-accent mt-3">Browse the Quest Board</a>
+    {% endif %}
+  </div>
+  <div class="hero-banner__seal" aria-hidden="true">
+    <span class="hero-banner__seal-mark">&#9876;</span>
+    <span>Adventure Land</span>
+  </div>
+</div>
+
+<p class="home-stat-intro">
+  One week. Three realms. <strong>{{ guild_stats.total_sessions }} chances</strong> to become a legend.
+</p>
+
+<div class="stat-strip home-stat-strip">
+ <div class="row text-center g-3">
+  <div class="col-3">
+    <div class="stat-strip__icon" aria-hidden="true">&#10022;</div>
+    <div class="stat-strip__number">7</div>
+    <div class="stat-strip__label">Days of Adventure</div>
+  </div>
+  <div class="col-3">
+    <div class="stat-strip__icon" aria-hidden="true">&#9672;</div>
+    <div class="stat-strip__number">{{ guild_stats.total_sessions }}</div>
+    <div class="stat-strip__label">Quest Sessions</div>
+  </div>
+  <div class="col-3">
+    <div class="stat-strip__icon" aria-hidden="true">&#9962;</div>
+    <div class="stat-strip__number">{{ locations|length }}</div>
+    <div class="stat-strip__label">Legendary Locations</div>
+  </div>
+  <div class="col-3">
+    <div class="stat-strip__icon" aria-hidden="true">&#9876;</div>
+    <div class="stat-strip__number">9</div>
+    <div class="stat-strip__label">Core Party Places</div>
+  </div>
+ </div>
+</div>
+
+<section class="mb-5" aria-labelledby="weekly-program-title">
+  <div class="home-section-heading mb-3">
+    <div>
+      <h2 class="section-title mb-1" id="weekly-program-title">This Week's Quest Program</h2>
+      <p class="form-hint mb-0">Sessions are ordered by day and starting time.</p>
+    </div>
+  </div>
+
+  {% if sessions %}
+    <div class="home-program-toolbar">
+      <div class="home-results-toolbar">
+        <p class="home-results-count mb-0"><strong>{{ sessions|length }}</strong> of {{ total_count }} sessions on the board</p>
+        <a href="{{ url_for('quest_board', day=selected.day, quest_type=selected.quest_type, difficulty=selected.difficulty, role=selected.role) }}"
+           class="section-link">Full quest board <span class="section-link__icon" aria-hidden="true">&rarr;</span></a>
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="home-program-layout">
+    <aside class="home-left-rail" aria-label="Quest filters and guild ranking">
+      <div class="filter-bar home-filter-sidebar p-3">
+        <form method="GET" action="{{ url_for('index') }}">
+          <p class="filter-bar__eyebrow mb-1"><span aria-hidden="true">&#10022;</span> Refine the board</p>
+          <h3 class="hero-row__title hero-row__title--sm mb-3">Filter sessions</h3>
+
+          <fieldset class="mb-3">
+            <legend class="form-label mb-1">Day</legend>
+            {% for d in days_options %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="day" value="{{ d }}" id="home-day-{{ loop.index }}"
+                     {% if d in selected.day %}checked{% endif %}>
+              <label class="form-check-label" for="home-day-{{ loop.index }}">{{ d }}</label>
+            </div>
+            {% endfor %}
+          </fieldset>
+
+          <fieldset class="mb-3">
+            <legend class="form-label mb-1">Quest type</legend>
+            {% for t in quest_types_options %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="quest_type" value="{{ t.name }}" id="home-type-{{ loop.index }}"
+                     {% if t.name in selected.quest_type %}checked{% endif %}>
+              <label class="form-check-label" for="home-type-{{ loop.index }}">{{ t.name }}</label>
+            </div>
+            {% endfor %}
+          </fieldset>
+
+          <fieldset class="mb-3">
+            <legend class="form-label mb-1">Difficulty</legend>
+            {% for d in difficulties_options %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="difficulty" value="{{ d.name }}" id="home-difficulty-{{ loop.index }}"
+                     {% if d.name in selected.difficulty %}checked{% endif %}>
+              <label class="form-check-label" for="home-difficulty-{{ loop.index }}">{{ d.name }}</label>
+            </div>
+            {% endfor %}
+          </fieldset>
+
+          <fieldset class="mb-3">
+            <legend class="form-label mb-1">Available role</legend>
+            {% for r in roles_options %}
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" name="role" value="{{ r.name }}" id="home-role-{{ loop.index }}"
+                     {% if r.name in selected.role %}checked{% endif %}>
+              <label class="form-check-label" for="home-role-{{ loop.index }}">{{ r.name }}</label>
+            </div>
+            {% endfor %}
+          </fieldset>
+
+          <button type="submit" class="btn btn-accent w-100 mb-2">Apply filters</button>
+          {% if selected.day or selected.quest_type or selected.difficulty or selected.role %}
+            <a href="{{ url_for('index') }}" class="btn btn-link link-muted w-100">Clear all filters</a>
+          {% endif %}
+        </form>
+      </div>
+
+      <section class="home-ranking-card" aria-labelledby="home-ranking-title">
+        <p class="filter-bar__eyebrow mb-1"><span aria-hidden="true">&#10022;</span> Guild race</p>
+        <h3 class="hero-row__title hero-row__title--sm mb-3" id="home-ranking-title">Hall of Experience</h3>
+        <ol class="home-ranking-list mb-0">
+          {% for adventurer in experienced_adventurers %}
+          <li>
+            <a href="{{ url_for('user_profile', user_id=adventurer.id) }}">
+              <span class="home-ranking-list__position">{{ loop.index }}</span>
+              {% if adventurer.avatar_filename %}
+                <img src="{{ url_for('static', filename='images/avatars/' + adventurer.avatar_filename) }}"
+                     alt="" class="home-ranking-list__avatar">
+              {% else %}
+                <span class="home-ranking-list__avatar avatar-fallback">{{ adventurer.name[0] }}</span>
+              {% endif %}
+              <span class="home-ranking-list__name">
+                <strong>{{ adventurer.name }} {{ adventurer.surname }}</strong>
+                <small>{{ adventurer.session_count }} quests · {{ adventurer.reserved_places }} places</small>
+              </span>
+            </a>
+          </li>
+          {% endfor %}
+        </ol>
+      </section>
+    </aside>
+
+    <div class="home-program-results">
+      {% if sessions %}
+        <div class="home-program-grid{% if sessions|length == 4 %} home-program-grid--four{% endif %}">
+          {% for s in sessions %}
+            <a href="{{ url_for('session_detail', session_id=s.id) }}" class="text-decoration-none d-block h-100">
+              <article class="quest-card quest-card--listing h-100">
+                <img class="quest-card__image" src="{{ url_for('static', filename='images/quests/' + s.image_filename) }}" alt="{{ s.title }}">
+                <div class="quest-card__body">
+                  <div class="quest-card__meta">
+                    <span class="pill pill-type">{{ s.quest_type }}</span>
+                    <span class="pill pill-difficulty">{{ s.difficulty }}</span>
+                  </div>
+                  <h3 class="quest-card__title">{{ s.title }}</h3>
+                  <p class="form-hint mb-0">{{ s.day }} · {{ s.start_time }} · {{ s.location }}</p>
+                  <span class="quest-card__action">View quest <span aria-hidden="true">&rarr;</span></span>
+                </div>
+              </article>
+            </a>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state__icon" aria-hidden="true">🧭</div>
+          <h3 class="empty-state__title">No quest sessions match those filters</h3>
+          <p class="empty-state__text">Try a different combination or clear the filters.</p>
+          <a href="{{ url_for('index') }}" class="btn btn-accent">Clear filters</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div class="home-section-heading mb-3">
+  <h2 class="section-title mb-0">Choose Your Path</h2>
+  <a href="{{ url_for('locations') }}" class="section-link">More <span class="section-link__icon" aria-hidden="true">&rarr;</span></a>
+</div>
+<div class="row row-cols-3 g-4 mb-5">
+  {% for loc in locations %}
+  <div class="col">
+    <a href="{{ url_for('locations') }}#location-{{ loc.id }}" class="text-decoration-none">
+      <div class="location-card h-100">
+        <img src="{{ url_for('static', filename='images/locations/' + loc.image_filename) }}"
+             alt="{{ loc.name }}" class="location-card__image">
+        <div class="location-card__body">
+          <h3 class="hero-row__title hero-row__title--sm">{{ loc.name }}</h3>
+          <p class="form-hint mb-0">{{ loc.tagline }}</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+{% if recent_comments %}
+<h2 class="section-title mb-3">What Adventurers Are Saying</h2>
+<div class="row row-cols-3 g-4 mb-5">
+  {% for c in recent_comments %}
+  <div class="col">
+    <div class="quest-card h-100">
+      <div class="quest-card__body">
+        <a href="{{ url_for('user_profile', user_id=c.user_id) }}" class="d-flex align-items-center gap-2 mb-3 text-decoration-none">
+          {% if c.avatar_filename %}
+            <img src="{{ url_for('static', filename='images/avatars/' + c.avatar_filename) }}"
+                 alt="{{ c.username }}" class="comment-avatar">
+          {% else %}
+            <span class="avatar-fallback">{{ c.name[0] }}</span>
+          {% endif %}
+          <span><strong>{{ c.name }}</strong> <span class="form-hint">@{{ c.username }}</span></span>
+        </a>
+        <p class="mb-2">&ldquo;{{ c.comment_text }}&rdquo;</p>
+        <p class="form-hint mb-0">on {{ c.quest_title }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div class="row g-4 mb-5 align-items-stretch">
+  <div class="col-6">
+    <div class="tutorial-hero h-100 d-flex flex-column justify-content-center">
+      <h2 class="section-title">Meet the Heroes</h2>
+      <p class="mb-3">Every quest begins with a Core Party of three, plus a specialist unlocked by
+      the quest's type — a silent Assassin, a Time-Lost Fighter, a Future Reader, or a Rune Solver.</p>
+      <div>
+        <a href="{{ url_for('heroes') }}" class="btn btn-outline-guild">View the Heroes</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-6">
+    <div class="tutorial-hero h-100 d-flex flex-column justify-content-center">
+      <h2 class="section-title">New to the Guild?</h2>
+      <p class="mb-3">Read the First Scroll to learn how parties, quest types, locations, and
+      difficulty all work together before you join your first session.</p>
+      <div>
+        <a href="{{ url_for('tutorial') }}" class="btn btn-outline-guild">Read the Tutorial</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if not current_user.is_authenticated %}
+<div class="cta-banner">
+  <h2 class="font-heading mb-2 cta-banner__title">Ready for your first quest?</h2>
+  <p class="form-hint mb-3">Sign up free and reserve your party's place on the board.</p>
+  <a href="{{ url_for('signup') }}" class="btn btn-accent">Join the Guild</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.name }} {{ profile_user.surname }} — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<section class="public-profile-page">
+<div class="profile-header public-profile-header mb-4">
+  <div class="public-profile-header__identity">
+    {% if profile_user.avatar_filename %}
+      <img src="{{ url_for('static', filename='images/avatars/' + profile_user.avatar_filename) }}"
+           alt="{{ profile_user.username }}" class="pill-image pill-image--square" width="72">
+    {% endif %}
+    <div>
+      <h1 class="font-heading mb-0 form-title">{{ profile_user.name }} {{ profile_user.surname }}</h1>
+      <p class="form-hint mb-0">@{{ profile_user.username }}</p>
+      {% if profile_user.bio %}<p class="profile-bio mb-0">{{ profile_user.bio }}</p>{% endif %}
+    </div>
+  </div>
+  <span class="pill pill-role">{{ 'Guild Master' if profile_user.role == 'guildmaster' else 'Adventurer' }}</span>
+</div>
+
+{% if adventurer_activity %}
+<section class="public-activity-card" aria-labelledby="adventure-record-title">
+  <div>
+    <h2 class="section-title mb-3" id="adventure-record-title">Adventure Record</h2>
+    <p class="form-hint mb-0">A summary of this adventurer's activity during the guild week.</p>
+  </div>
+  <div class="public-activity-stats">
+    <div>
+      <strong>{{ adventurer_activity.session_count }}</strong>
+      <span>Quest sessions joined</span>
+    </div>
+    <div>
+      <strong>{{ adventurer_activity.reserved_places }}</strong>
+      <span>Places reserved</span>
+    </div>
+    <div>
+      <strong>{{ adventurer_activity.roles|join(', ') if adventurer_activity.roles else '—' }}</strong>
+      <span>Party roles selected</span>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% if created_quests is not none %}
+<h2 class="section-title mt-5">Quests Created by {{ profile_user.name }}</h2>
+{% if created_quests %}
+<div class="row row-cols-3 g-4">
+  {% for q in created_quests %}
+  <div class="col">
+    <article class="quest-card h-100">
+      <img class="quest-card__image" src="{{ url_for('static', filename='images/quests/' + q.image_filename) }}" alt="{{ q.title }}">
+      <div class="quest-card__body">
+        <div class="quest-card__meta">
+          <span class="pill pill-type">{{ q.quest_type }}</span>
+          <span class="pill pill-difficulty">{{ q.difficulty }}</span>
+        </div>
+        <h3 class="quest-card__title">{{ q.title }}</h3>
+      </div>
+    </article>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state empty-state--compact">
+  <div class="empty-state__icon" aria-hidden="true">📜</div>
+  <h3 class="empty-state__title">No quests created yet</h3>
+  <p class="empty-state__text mb-0">This Guild Master has not published a quest yet.</p>
+</div>
+{% endif %}
+{% endif %}
+ </section>
+{% endblock %}

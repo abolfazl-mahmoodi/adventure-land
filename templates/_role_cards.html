@@ -1,0 +1,24 @@
+{% macro role_cards(roles, availability, role_characters, field_name, id_prefix, selected_name=None) %}
+  <div class="role-card-grid">
+    {% for role in roles %}
+      {% set remaining = availability.get(role.name, 0) %}
+      {% set character = role_characters.get(role.name) %}
+      <input class="role-card-input role-option-{{ role.id }}{% if remaining == 1 %} role-card-input--last{% endif %}" type="radio"
+             id="{{ id_prefix }}_{{ role.id }}" name="{{ field_name }}" value="{{ role.name }}"
+             {% if selected_name == role.name %}checked{% endif %}
+             {% if remaining <= 0 %}disabled{% endif %} required>
+      <label class="role-select-card{% if remaining <= 0 %} role-select-card--unavailable{% endif %}"
+             for="{{ id_prefix }}_{{ role.id }}">
+        {% if character and character.image_filename %}
+          <img src="{{ url_for('static', filename='images/characters/' + character.image_filename) }}"
+               alt="{{ character.name }}" class="role-select-card__image">
+        {% endif %}
+        <span class="role-select-card__content">
+          <strong>{{ role.name }}</strong>
+          {% if character %}<small>{{ character.name }}</small>{% endif %}
+          <span class="role-select-card__availability">{{ remaining }} place{{ 's' if remaining != 1 else '' }} available</span>
+        </span>
+      </label>
+    {% endfor %}
+  </div>
+{% endmacro %}

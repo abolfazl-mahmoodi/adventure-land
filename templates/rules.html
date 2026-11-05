@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Rules — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<header class="rules-intro">
+  <p class="rules-intro__eyebrow"><span aria-hidden="true">&#10022;</span> The guild charter</p>
+  <h1 class="section-title">Guild Rules</h1>
+  <p class="rules-intro__lead mb-0 text-measure">
+    The Tutorial explains how to play. This page lists the actual constraints the guild enforces —
+    what you can and can't do, and why a button might be disabled.
+  </p>
+</header>
+
+<div class="row row-cols-2 g-4 rules-grid">
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">I</span>
+      <h2 class="rule-card__title">Party Roles</h2>
+      <p class="rule-card__text mb-2">Every quest session has a fixed number of places per role:</p>
+      <ul class="mb-0">
+        {% for r in roles %}
+          <li>
+            <strong>{{ r.name }}</strong> — {{ r.max_places_per_session }}
+            place{{ 's' if r.max_places_per_session != 1 else '' }}
+            {% if r.quest_type_name %}in {{ r.quest_type_name }} quests{% else %}in every session{% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">II</span>
+      <h2 class="rule-card__title">Reserving a Place</h2>
+      <p class="rule-card__text mb-0">
+        You may reserve 1 or {{ max_places }} places on a single participation. The second place is
+        for a named companion who chooses their own available role. Your role and the companion's
+        role each consume one place from the corresponding capacity.
+      </p>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">III</span>
+      <h2 class="rule-card__title">Weekly Limit</h2>
+      <p class="rule-card__text mb-0">
+        Each adventurer can join at most <strong>{{ max_sessions }} quest sessions</strong> during the
+        fictional week. You also can't join two sessions that overlap in time.
+      </p>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">IV</span>
+      <h2 class="rule-card__title">Changing Your Mind</h2>
+      <p class="rule-card__text mb-0">
+        A participation can be edited or cancelled only if its session starts more than
+        <strong>{{ modify_cutoff_hours }} hours</strong> after the guild's current simulated time.
+        After that, it's locked in.
+      </p>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">V</span>
+      <h2 class="rule-card__title">Joining a Session</h2>
+      <p class="rule-card__text mb-0">
+        You can't join a quest session that has already taken place, relative to the guild's current
+        simulated time.
+      </p>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">VI</span>
+      <h2 class="rule-card__title">Quests vs. Sessions</h2>
+      <p class="rule-card__text mb-0">
+        Once a quest is created, its story, type, and difficulty can never change — only its sessions
+        (day, time, location) can be scheduled or edited, and only while a session still has no
+        participants.
+      </p>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">VII</span>
+      <h2 class="rule-card__title">One Location, One Session</h2>
+      <p class="rule-card__text mb-0">
+        The guild never double-books a location — two sessions can't overlap in time at the same
+        location.
+      </p>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="tutorial-step rule-card h-100">
+      <span class="rule-card__index" aria-hidden="true">VIII</span>
+      <h2 class="rule-card__title">The Guild Master</h2>
+      <p class="rule-card__text mb-0">
+        The Guild Master creates quests and schedules sessions, but never joins a party — their role
+        is to run the board, not adventure on it.
+      </p>
+    </div>
+  </div>
+</div>
+
+<div class="text-center mt-5 mb-3">
+  <a href="{{ url_for('tutorial') }}" class="btn btn-outline-guild">Read the Tutorial</a>
+</div>
+{% endblock %}

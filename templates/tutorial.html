@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}Tutorial — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="hero-banner tutorial-page-hero">
+  <img src="{{ url_for('static', filename='images/locations/dungeons_of_forgotten_poems.jpg') }}" alt="" class="hero-banner__bg">
+  <div class="hero-banner__content">
+    <h1 class="hero-banner__tagline">The First Scroll: How to Survive</h1>
+    <p class="hero-banner__sub">Learn how quests, heroes, locations, and difficulty work.</p>
+  </div>
+</div>
+
+<div class="tutorial-hero">
+  <p>Welcome, Adventurer.</p>
+  <p>Before entering the world of Vaelthorn, Eldoria, and the Legacy Dungeons, you must learn how
+  each quest works. Every adventure requires a balanced party, the right strategy, and the courage
+  to survive unknown dangers.</p>
+</div>
+
+<!-- I explain the basic quest information in this section. -->
+<h2 class="font-heading section-title subsection-title">1. Every Quest Needs a Core Party</h2>
+<p class="form-hint mb-3 text-measure">
+  Every quest begins with the Core Party. Your Warrior protects the team, your Mage attacks with
+  magic, and your Healer keeps the party alive. Without these three heroes, no adventure can begin.
+</p>
+<div class="row row-cols-3 g-4 mb-5">
+  <div class="col">
+    <div class="tutorial-step">
+      <span class="pill pill-role mb-2">Warrior</span>
+      <p class="mb-0">Protects the party on the front line.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="tutorial-step">
+      <span class="pill pill-role mb-2">Mage</span>
+      <p class="mb-0">Attacks with magic from a distance.</p>
+    </div>
+  </div>
+  <div class="col">
+    <div class="tutorial-step">
+      <span class="pill pill-role mb-2">Healer</span>
+      <p class="mb-0">Restores health and keeps everyone alive.</p>
+    </div>
+  </div>
+</div>
+
+<!-- I explain the party roles in this section. -->
+<h2 class="font-heading section-title subsection-title">2. Quest Types Unlock Special Heroes</h2>
+<p class="form-hint mb-3 text-measure">
+  Every quest type unlocks one selectable specialist role with one place. Stealth missions gain an
+  Assassin, combat missions a Time-Lost Fighter, exploration missions a Future Reader, and puzzle
+  missions a Rune Solver.
+</p>
+<div class="table-responsive mb-5">
+  <table class="table align-middle">
+    <thead>
+      <tr class="form-hint">
+        <th>Quest Type</th>
+        <th>Extra Character</th>
+        <th>Why Needed</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in bonus_characters %}
+      <tr>
+        <td><span class="pill pill-type">{{ c.quest_type_name }}</span></td>
+        <td><strong>{{ c.name }}</strong>, {{ c.title }}</td>
+        <td class="form-hint">{{ c.identity }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- I explain the specialist roles in this section. -->
+<h2 class="font-heading section-title subsection-title" id="locations">3. Know Your Locations</h2>
+<p class="form-hint mb-3 text-measure">
+  Each location changes the feeling of the adventure. The forest hides magical beasts, the ruined
+  city tests your courage in battle, and the dungeons challenge your mind with poems, traps, and legends.
+</p>
+<div class="row row-cols-3 g-4 mb-5">
+  {% for loc in locations %}
+  <div class="col">
+    <div class="location-card h-100">
+      <img src="{{ url_for('static', filename='images/locations/' + loc.image_filename) }}"
+           alt="{{ loc.name }}" class="location-card__image">
+      <div class="location-card__body">
+        <h3 class="hero-row__title hero-row__title--sm">{{ loc.name }}</h3>
+        <p class="form-hint">{{ loc.tagline }}</p>
+        <p class="location-desc">{{ loc.description }}</p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- I explain the locations in this section. -->
+<h2 class="font-heading section-title subsection-title">4. Choose Your Difficulty</h2>
+<p class="mb-5 text-measure">
+  Choose your difficulty carefully. Easy quests help you learn the world, medium quests test your
+  teamwork, and hard quests punish every mistake but offer the greatest rewards.
+</p>
+
+<!-- I explain the difficulty levels in this section. -->
+<h2 class="font-heading section-title subsection-title">5. Understand Quest Time</h2>
+<p class="mb-5 text-measure">
+  Every quest lists its duration in minutes on its quest card. This is how long your party will be
+  occupied once a session begins — plan your other quest sessions around it, since you can't join
+  two sessions that overlap in time.
+</p>
+
+<!-- I finish the tutorial in this section. -->
+<h2 class="font-heading section-title subsection-title">6. How to Start Your Adventure</h2>
+<div class="row row-cols-5 g-4 mb-4">
+  {% set steps = [
+    ("1", "Read the Quest Scroll", "Open a quest session to see its story, type, and difficulty."),
+    ("2", "Choose Your Path", "Browse the Quest Board and pick a session that fits your schedule."),
+    ("3", "Prepare Your Party", "Pick a core role or the quest-type specialist, then choose how many places to reserve."),
+    ("4", "Enter the Location", "Confirm your join — your party is now scheduled for that day and time."),
+    ("5", "Survive the Adventure", "Show up ready. You can still adjust your role up to 8 hours before it starts.")
+  ] %}
+  {% for num, title, text in steps %}
+  <div class="col">
+    <div class="tutorial-step">
+      <div class="tutorial-step__number">{{ num }}</div>
+      <h3 class="hero-row__title hero-row__title--xs">{{ title }}</h3>
+      <p class="form-hint mb-0">{{ text }}</p>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="text-center mb-5">
+  <a href="{{ url_for('quest_board') }}" class="btn btn-accent">Go to the Quest Board</a>
+</div>
+{% endblock %}

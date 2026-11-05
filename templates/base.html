@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}{{ guild_name }}{% endblock %}</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&amp;family=Lora:wght@400;600;700&amp;display=swap"
+        rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+
+  <nav class="navbar navbar-guild">
+    <div class="container">
+      <a class="navbar-brand" href="{{ url_for('index') }}"><span class="brand-mark" aria-hidden="true">⚔</span> {{ guild_name }}</a>
+      <div class="navbar-desktop" id="navMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('quest_board') }}">Quest Board</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('heroes') }}">Heroes</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('locations') }}">Locations</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('tutorial') }}">Tutorial</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('rules') }}">Rules</a></li>
+          {% if current_user.is_authenticated and current_user.is_guildmaster %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('guildmaster_dashboard') }}">Guild Master Desk</a></li>
+          {% elif current_user.is_authenticated %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('profile') }}">My Quests</a></li>
+          {% endif %}
+        </ul>
+        <ul class="navbar-nav navbar-account align-items-center">
+          {% if current_user.is_authenticated %}
+            <li class="nav-item">
+              <a class="nav-link d-flex align-items-center gap-2" href="{{ url_for('profile') }}" aria-label="Open my profile">
+                {% if current_user.avatar_filename %}
+                  <img class="navbar-avatar" src="{{ url_for('static', filename='images/avatars/' + current_user.avatar_filename) }}" alt="{{ current_user.username }}">
+                {% else %}
+                  <span class="navbar-avatar avatar-fallback">{{ current_user.name[0] }}</span>
+                {% endif %}
+                {{ current_user.username }}
+              </a>
+            </li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Log out</a></li>
+          {% else %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Log in</a></li>
+            <li class="nav-item ms-2">
+              <a class="btn btn-accent btn-sm" href="{{ url_for('signup') }}">Sign up</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}" role="alert">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer-guild">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-4">
+          <h6><span class="brand-mark" aria-hidden="true">⚔</span> {{ guild_name }}</h6>
+          <p class="form-hint">{{ guild_tagline }}</p>
+        </div>
+        <div class="col-2">
+          <h6>Explore</h6>
+          <a href="{{ url_for('quest_board') }}">Quest Board</a>
+          <a href="{{ url_for('heroes') }}">Heroes</a>
+          <a href="{{ url_for('tutorial') }}">Tutorial</a>
+          <a href="{{ url_for('rules') }}">Rules</a>
+        </div>
+        <div class="col-2">
+          <h6>Locations</h6>
+          <a href="{{ url_for('locations') }}#location-1">Forbidden Forest of Vaelthorn</a>
+          <a href="{{ url_for('locations') }}#location-2">Fallen City of Laughter</a>
+          <a href="{{ url_for('locations') }}#location-3">Dungeons of Forgotten Poems</a>
+        </div>
+        <div class="col-2">
+          <h6>Account</h6>
+          {% if current_user.is_authenticated %}
+            <a href="{{ url_for('profile') }}">My profile</a>
+            <a href="{{ url_for('logout') }}">Log out</a>
+          {% else %}
+            <a href="{{ url_for('login') }}">Log in</a>
+            <a href="{{ url_for('signup') }}">Sign up</a>
+          {% endif %}
+        </div>
+        <div class="col-2">
+          <h6>Connect</h6>
+          <div class="d-flex gap-3">
+            <a href="https://www.linkedin.com/in/abolfazl-mahmoodi-5349b43b4/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" class="footer-social-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.86 0-2.15 1.45-2.15 2.94v5.66H9.35V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45z"/>
+              </svg>
+            </a>
+            <a href="https://github.com/abolfazl-mahmoodi" target="_blank" rel="noopener noreferrer" aria-label="GitHub" class="footer-social-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.5 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.36-3.37-1.36-.46-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.63.07-.63 1 .07 1.53 1.05 1.53 1.05.89 1.57 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.73 0 0 .84-.28 2.75 1.05a9.3 9.3 0 0 1 5 0c1.9-1.33 2.75-1.05 2.75-1.05.55 1.42.2 2.47.1 2.73.64.71 1.03 1.62 1.03 2.74 0 3.92-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .28.18.6.69.5A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-guild__bottom text-center">
+        <span>&copy; {{ guild_name }} — a fictional guild for a fictional week.</span>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

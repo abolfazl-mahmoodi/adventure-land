@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block title %}Guild Master Profile — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<section class="profile-header profile-header--account mb-4" aria-labelledby="profile-title">
+  {% if current_user.avatar_filename %}
+    <img src="{{ url_for('static', filename='images/avatars/' + current_user.avatar_filename) }}"
+         alt="{{ current_user.username }}" class="profile-avatar">
+  {% else %}
+    <span class="profile-avatar avatar-fallback">{{ current_user.name[0] }}</span>
+  {% endif %}
+  <div class="flex-grow-1">
+    <span class="pill pill-role mb-2">Guild Master</span>
+    <h1 class="section-title mb-1" id="profile-title">{{ current_user.name }} {{ current_user.surname }}</h1>
+    <p class="form-hint mb-0">@{{ current_user.username }}</p>
+    {% if current_user.bio %}<p class="profile-bio mb-0">{{ current_user.bio }}</p>{% endif %}
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-guild">Edit profile</a>
+    <a href="{{ url_for('guildmaster_dashboard') }}" class="btn btn-outline-guild">Open Guild Master Desk</a>
+  </div>
+</section>
+
+<div class="row text-center stat-strip g-3 mb-5">
+  <div class="col-3">
+    <div class="stat-strip__number">{{ quest_count }}</div>
+    <div class="stat-strip__label">Quests Created</div>
+  </div>
+  <div class="col-3">
+    <div class="stat-strip__number">{{ session_count }}</div>
+    <div class="stat-strip__label">Sessions Scheduled</div>
+  </div>
+  <div class="col-3">
+    <div class="stat-strip__number">{{ participation_count }}</div>
+    <div class="stat-strip__label">Participations</div>
+  </div>
+  <div class="col-3">
+    <div class="stat-strip__number">{{ reserved_places }}</div>
+    <div class="stat-strip__label">Places Reserved</div>
+  </div>
+</div>
+
+<div class="d-flex justify-content-between align-items-end mb-3">
+  <div>
+    <h2 class="section-title mb-1">Participation in My Quests</h2>
+    <p class="form-hint mb-0">See how many adventurers joined each session and which roles they selected.</p>
+  </div>
+  <a href="{{ url_for('new_quest') }}" class="btn btn-accent">+ New Quest</a>
+</div>
+
+{% if quests_with_sessions %}
+  {% for entry in quests_with_sessions %}
+  <article class="quest-card mb-4">
+    <div class="quest-card__body">
+      <div class="quest-card__meta">
+        <span class="pill pill-type">{{ entry.quest.quest_type }}</span>
+        <span class="pill pill-difficulty">{{ entry.quest.difficulty }}</span>
+      </div>
+      <h3 class="quest-card__title">{{ entry.quest.title }}</h3>
+
+      {% if entry.sessions %}
+        <div class="row g-3 mt-1">
+          {% for item in entry.sessions %}
+            {% set session = item.session %}
+            {% set stats = stats_by_session_id[session.id] %}
+            {% set participants = participants_by_session_id[session.id] %}
+            <div class="col-6">
+              <section class="session-summary h-100">
+                <div class="session-summary__header">
+                  <div>
+                    <strong>{{ session.day }} · {{ session.start_time }}</strong>
+                    <p class="form-hint mb-2">{{ session.location }}</p>
+                  </div>
+                  <span class="pill pill-role session-count-badge">{{ stats.total_reserved }} place{{ 's' if stats.total_reserved != 1 else '' }} reserved</span>
+                </div>
+                <p class="mb-2"><strong>{{ stats.total_reserved }}</strong> of {{ stats.total_capacity }} party places reserved</p>
+
+                <div class="role-stats" aria-label="Remaining places by role">
+                  {% for role_stat in stats.per_role %}
+                    <div class="role-stat">
+                      <strong>{{ role_stat.role }}</strong>
+                      <span>{{ role_stat.reserved }}/{{ role_stat.capacity }} reserved</span>
+                      <span class="role-stat-left">{{ role_stat.remaining }} left</span>
+                    </div>
+                  {% endfor %}
+                </div>
+
+                <p class="most-requested mb-3">
+                  <span class="form-hint">Most requested role:</span>
+                  {% if stats.most_requested %}
+                    <strong>{{ stats.most_requested | join(', ') }}</strong>
+                  {% else %}
+                    <span>No reservations yet</span>
+                  {% endif %}
+                </p>
+
+                {% if participants %}
+                  <ul class="participant-list mb-3">
+                    {% for participant in participants %}
+                    <li>
+                      <a href="{{ url_for('user_profile', user_id=participant.adventurer_id) }}" class="link-muted">
+                        {{ participant.name }} {{ participant.surname }}
+                      </a>
+                      <span class="form-hint">· {{ participant.role_name }}</span>
+                      {% if participant.companion_name %}
+                        <span class="form-hint d-block ms-3">
+                          Companion: {{ participant.companion_name }} {{ participant.companion_surname }} · {{ participant.companion_role_name }}
+                        </span>
+                      {% endif %}
+                    </li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <p class="form-hint mb-3">No adventurers have joined this session yet.</p>
+                {% endif %}
+
+                <div class="session-actions">
+                {% if item.has_participants %}
+                  <span class="pill pill-locked">Locked — participants have joined</span>
+                {% else %}
+                  <a href="{{ url_for('edit_session', session_id=session.id) }}" class="btn btn-outline-guild btn-sm">Edit session</a>
+                  <form method="POST" action="{{ url_for('cancel_session', session_id=session.id) }}">
+                    <button type="submit" class="btn btn-danger-quiet btn-sm">Cancel session</button>
+                  </form>
+                {% endif %}
+                </div>
+              </section>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="form-hint mb-0">No sessions scheduled yet.</p>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    <div class="empty-state__icon" aria-hidden="true">📜</div>
+    <h3 class="empty-state__title">No quests created yet</h3>
+    <p class="empty-state__text">Create your first quest to begin the weekly program.</p>
+    <a href="{{ url_for('new_quest') }}" class="btn btn-accent">+ New Quest</a>
+  </div>
+{% endif %}
+{% endblock %}

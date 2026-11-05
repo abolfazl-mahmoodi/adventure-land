@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-card auth-card--form">
+  <h1 class="font-heading mb-1 form-title">Edit Profile</h1>
+  <p class="form-hint mb-4">Update your personal details. Your username and email address cannot be changed.</p>
+
+  <form method="POST" action="{{ url_for('edit_profile') }}" enctype="multipart/form-data">
+    <input type="hidden" name="action" value="profile">
+    <div class="row">
+      <div class="col-6 mb-3">
+        <label for="name" class="form-label">First name</label>
+        <input type="text" class="form-control {% if errors.name %}is-invalid{% endif %}"
+               id="name" name="name" required minlength="1" maxlength="50"
+               value="{{ form_data.get('name', '') }}">
+        {% if errors.name %}<div class="invalid-feedback d-block">{{ errors.name }}</div>{% endif %}
+      </div>
+      <div class="col-6 mb-3">
+        <label for="surname" class="form-label">Surname</label>
+        <input type="text" class="form-control {% if errors.surname %}is-invalid{% endif %}"
+               id="surname" name="surname" required maxlength="50"
+               value="{{ form_data.get('surname', '') }}">
+        {% if errors.surname %}<div class="invalid-feedback d-block">{{ errors.surname }}</div>{% endif %}
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-6 mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" value="{{ user_row.username }}" disabled>
+      </div>
+      <div class="col-6 mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email" value="{{ user_row.email }}" disabled>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label for="bio" class="form-label">Bio <span class="form-hint">(optional)</span></label>
+      <textarea class="form-control {% if errors.bio %}is-invalid{% endif %}"
+                id="bio" name="bio" rows="4" maxlength="500"
+                placeholder="Tell other guild members something about yourself.">{{ form_data.get('bio') or '' }}</textarea>
+      {% if errors.bio %}
+        <div class="invalid-feedback d-block">{{ errors.bio }}</div>
+      {% else %}
+        <div class="form-hint">Maximum 500 characters. Leave empty if you do not want a bio.</div>
+      {% endif %}
+    </div>
+
+    <div class="mb-4">
+      <label for="avatar" class="form-label">Change profile picture</label>
+      <input type="file" class="form-control {% if errors.avatar %}is-invalid{% endif %}"
+             id="avatar" name="avatar" accept=".jpg,.jpeg,.png,.gif,.webp">
+      {% if errors.avatar %}<div class="invalid-feedback d-block">{{ errors.avatar }}</div>{% endif %}
+      <div class="form-hint">Leave empty to keep your current picture.</div>
+    </div>
+
+    <div class="d-flex gap-2 mb-4">
+      <button type="submit" class="btn btn-accent flex-grow-1">Save profile</button>
+      <a href="{{ url_for('profile') }}" class="btn btn-outline-guild">Cancel</a>
+    </div>
+  </form>
+
+  <form method="POST" action="{{ url_for('edit_profile') }}">
+    <input type="hidden" name="action" value="password">
+    <fieldset class="profile-password-fields mb-0">
+      <legend class="hero-row__title hero-row__title--sm">Change password</legend>
+      <p class="form-hint">Enter your current password, then enter the same new password twice.</p>
+
+      <div class="mb-3">
+        <label for="current_password" class="form-label">Current password</label>
+        <input type="password" class="form-control {% if errors.current_password %}is-invalid{% endif %}"
+               id="current_password" name="current_password" required autocomplete="current-password">
+        {% if errors.current_password %}<div class="invalid-feedback d-block">{{ errors.current_password }}</div>{% endif %}
+      </div>
+
+      <div class="row">
+        <div class="col-6 mb-3">
+          <label for="new_password" class="form-label">New password</label>
+          <input type="password" class="form-control {% if errors.new_password %}is-invalid{% endif %}"
+                 id="new_password" name="new_password" required minlength="8"
+                 pattern="(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
+                 title="At least 8 characters, one uppercase letter, one number, one symbol"
+                 autocomplete="new-password">
+          {% if errors.new_password %}
+            <div class="invalid-feedback d-block">{{ errors.new_password }}</div>
+          {% else %}
+            <div class="form-hint">Minimum 8 characters, with an uppercase letter, number, and symbol.</div>
+          {% endif %}
+        </div>
+        <div class="col-6 mb-3">
+          <label for="confirm_password" class="form-label">Confirm new password</label>
+          <input type="password" class="form-control {% if errors.confirm_password %}is-invalid{% endif %}"
+                 id="confirm_password" name="confirm_password" required minlength="8"
+                 pattern="(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}"
+                 title="Repeat the same password; it must include an uppercase letter, number, and symbol"
+                 autocomplete="new-password">
+          {% if errors.confirm_password %}<div class="invalid-feedback d-block">{{ errors.confirm_password }}</div>{% endif %}
+        </div>
+      </div>
+      <button type="submit" class="btn btn-accent w-100">Update password</button>
+    </fieldset>
+  </form>
+</div>
+{% endblock %}

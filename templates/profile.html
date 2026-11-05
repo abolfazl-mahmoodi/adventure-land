@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}My Profile — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<section class="profile-header profile-header--account mb-4" aria-labelledby="profile-title">
+  {% if current_user.avatar_filename %}
+    <img src="{{ url_for('static', filename='images/avatars/' + current_user.avatar_filename) }}"
+         alt="{{ current_user.username }}" class="profile-avatar">
+  {% else %}
+    <span class="profile-avatar avatar-fallback">{{ current_user.name[0] }}</span>
+  {% endif %}
+  <div class="flex-grow-1">
+    <span class="pill pill-role mb-2">Adventurer</span>
+    <h1 class="section-title mb-1" id="profile-title">{{ current_user.name }} {{ current_user.surname }}</h1>
+    <p class="form-hint mb-0">@{{ current_user.username }} · {{ session_count }} of {{ max_sessions }} weekly sessions joined</p>
+    {% if current_user.bio %}<p class="profile-bio mb-0">{{ current_user.bio }}</p>{% endif %}
+  </div>
+  <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-guild">Edit profile</a>
+</section>
+
+<h2 class="section-title">My Reservations</h2>
+
+{% if participations %}
+<div class="row row-cols-2 g-4">
+  {% for item in participations %}
+    {% set p = item.participation %}
+    <div class="col">
+      <article class="quest-card h-100">
+        <div class="quest-card__body">
+          <div class="quest-card__meta">
+            <span class="pill pill-role">{{ p.role_name }}</span>
+            <span class="pill pill-location">{{ p.location }}</span>
+          </div>
+          <h3 class="quest-card__title">{{ p.title }}</h3>
+          <p class="form-hint mb-1">{{ p.day }} · {{ p.start_time }} · {{ p.duration_minutes }} min</p>
+          <p class="form-hint mb-1">{{ p.places_reserved }} place{{ 's' if p.places_reserved != 1 else '' }} reserved</p>
+          {% if p.companion_name %}
+            <div class="companion-summary mb-3">
+              <span class="form-hint d-block">Companion</span>
+              <strong>{{ p.companion_name }} {{ p.companion_surname }}</strong>
+              <span class="form-hint d-block">{{ p.companion_role_name }} · born {{ p.companion_birthdate }}</span>
+              {% if p.companion_email %}<span class="form-hint d-block">{{ p.companion_email }}</span>{% endif %}
+            </div>
+          {% endif %}
+          <p class="mb-3"><strong>{{ item.time_until }}</strong></p>
+
+          {% if item.modifiable %}
+            <div class="d-flex gap-2">
+              <a href="{{ url_for('edit_participation', participation_id=p.id) }}" class="btn btn-outline-guild btn-sm">Edit</a>
+              <form method="POST" action="{{ url_for('cancel_participation', participation_id=p.id) }}">
+                <button type="submit" class="btn btn-danger-quiet btn-sm">Cancel</button>
+              </form>
+            </div>
+          {% else %}
+            <span class="pill pill-locked">
+              Locked — starts within 8 hours
+            </span>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div class="empty-state__icon">🎒</div>
+  <h3 class="empty-state__title">You haven't joined any quests yet</h3>
+  <p class="empty-state__text">Browse the quest board and find your first adventure.</p>
+  <a href="{{ url_for('quest_board') }}" class="btn btn-accent">Browse the Quest Board</a>
+</div>
+{% endif %}
+{% endblock %}

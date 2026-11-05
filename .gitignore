@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+__MACOSX/
+._*
+.env
+.env.*
+.venv/
+venv/
+credentials.md
+*.sqbpro
+*.db-journal
+*.db-wal
+*.db-shm
+static/images/avatars/*
+!static/images/avatars/.gitkeep

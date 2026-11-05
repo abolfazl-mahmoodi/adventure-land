@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% from "_role_cards.html" import role_cards %}
+{% block title %}Edit Participation — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="auth-card auth-card--form participation-editor">
+  <h1 class="font-heading mb-1 form-title">Manage Participation</h1>
+  <p class="form-hint mb-4">{{ session.title }} — {{ session.day }} · {{ session.start_time }} · {{ session.location }}</p>
+
+  <nav class="reservation-mode-switch" aria-label="Reservation type">
+    <a href="{{ url_for('edit_participation', participation_id=participation.id, reservation='solo') }}"
+       class="btn {% if reservation_mode == 'solo' %}btn-accent{% else %}btn-outline-guild{% endif %}">Only my place</a>
+    <a href="{{ url_for('edit_participation', participation_id=participation.id, reservation='companion') }}"
+       class="btn {% if reservation_mode == 'companion' %}btn-accent{% else %}btn-outline-guild{% endif %}">With a companion</a>
+  </nav>
+
+  {% if reservation_mode == 'solo' %}
+  <section class="reservation-choice" aria-labelledby="edit-solo-title">
+    <h2 class="reservation-choice__title" id="edit-solo-title">Reserve only my place</h2>
+    <p class="form-hint">Choose one role. Saving removes any current companion information.</p>
+    <form method="POST" action="{{ url_for('edit_participation', participation_id=participation.id) }}">
+      <input type="hidden" name="places" value="1">
+      <fieldset class="mb-3">
+        <legend class="form-label">Your role</legend>
+        {{ role_cards(roles, editable_availability, role_characters, 'role', 'solo_role', current_role.name) }}
+      </fieldset>
+      <button type="submit" class="btn btn-outline-guild w-100">Save solo reservation</button>
+    </form>
+  </section>
+  {% else %}
+  <section class="reservation-choice" aria-labelledby="edit-companion-title">
+    <h2 class="reservation-choice__title" id="edit-companion-title">Reserve with a companion</h2>
+    <p class="form-hint">Choose one role for yourself and one role for your companion. Each choice uses one available place.</p>
+
+    <form method="POST" action="{{ url_for('edit_participation', participation_id=participation.id) }}" class="role-pair-form">
+      <input type="hidden" name="places" value="2">
+
+      <fieldset class="mb-4">
+        <legend class="form-label">Your role</legend>
+        {{ role_cards(roles, editable_availability, role_characters, 'role', 'edit_primary_role', current_role.name) }}
+      </fieldset>
+
+      <fieldset class="mb-4">
+        <legend class="form-label">Your companion's role</legend>
+        {{ role_cards(roles, editable_availability, role_characters, 'companion_role', 'edit_companion_role', current_companion_role.name if current_companion_role else None) }}
+      </fieldset>
+
+      <fieldset class="companion-fields">
+        <legend class="form-label">Companion details</legend>
+        <div class="row g-3">
+          <div class="col-6">
+            <label for="companion_name" class="form-label">First name</label>
+            <input class="form-control" id="companion_name" name="companion_name" required minlength="1" maxlength="50"
+                   value="{{ participation.companion_name or '' }}">
+          </div>
+          <div class="col-6">
+            <label for="companion_surname" class="form-label">Surname</label>
+            <input class="form-control" id="companion_surname" name="companion_surname" required minlength="1" maxlength="50"
+                   value="{{ participation.companion_surname or '' }}">
+          </div>
+          <div class="col-6">
+            <label for="companion_birthdate" class="form-label">Birthdate</label>
+            <input class="form-control" type="date" id="companion_birthdate" name="companion_birthdate" required max="{{ today_iso }}"
+                   value="{{ participation.companion_birthdate or '' }}">
+          </div>
+          <div class="col-6">
+            <label for="companion_email" class="form-label">Email <span class="form-hint">(optional)</span></label>
+            <input class="form-control" type="email" id="companion_email" name="companion_email" maxlength="254"
+                   value="{{ participation.companion_email or '' }}">
+          </div>
+        </div>
+      </fieldset>
+      <button type="submit" class="btn btn-accent w-100 mt-3">Save with companion</button>
+    </form>
+  </section>
+  {% endif %}
+
+  <a href="{{ url_for('profile') }}" class="btn btn-link link-muted mt-3">Back to my profile</a>
+</div>
+{% endblock %}

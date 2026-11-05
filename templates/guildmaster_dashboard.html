@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Guild Master Desk — {{ guild_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h1 class="section-title mb-1">Guild Master Desk</h1>
+    <p class="form-hint mb-0">Simulated clock: <strong>{{ now.current_day }}, {{ now.current_time_hhmm }}</strong></p>
+  </div>
+  <a href="{{ url_for('new_quest') }}" class="btn btn-accent">+ New Quest</a>
+</div>
+
+{% if quests_with_sessions %}
+  {% for entry in quests_with_sessions %}
+    {% set quest = entry.quest %}
+    <article class="quest-card mb-4">
+      <div class="quest-card__body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <div class="quest-card__meta">
+              <span class="pill pill-type">{{ quest.quest_type }}</span>
+              <span class="pill pill-difficulty">{{ quest.difficulty }}</span>
+            </div>
+            <h3 class="quest-card__title">{{ quest.title }}</h3>
+            <p class="form-hint">{{ quest.duration_minutes }} min</p>
+          </div>
+          <a href="{{ url_for('new_session', quest_id=quest.id) }}" class="btn btn-outline-guild btn-sm">+ Add session</a>
+        </div>
+
+        {% if entry.sessions %}
+        <table class="table align-middle mt-3">
+          <thead>
+            <tr class="form-hint">
+              <th>Day / Time</th>
+              <th>Location</th>
+              <th>Reserved</th>
+              <th>Most requested</th>
+              <th class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in entry.sessions %}
+              {% set session = s.session %}
+              {% set stats = stats_by_session_id[session.id] %}
+              <tr>
+                <td>{{ session.day }} · {{ session.start_time }}</td>
+                <td><span class="pill pill-location">{{ session.location }}</span></td>
+                <td>
+                  {% for r in stats.per_role %}
+                    <span class="form-hint">{{ r.role }}: {{ r.reserved }}/{{ r.capacity }} reserved ({{ r.remaining }} left)</span>{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+                <td>
+                  {% if stats.most_requested %}
+                    {{ stats.most_requested | join(', ') }}
+                  {% else %}
+                    <span class="form-hint">—</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if s.has_participants %}
+                    <div class="desk-actions">
+                      <span class="pill pill-locked">Locked</span>
+                    </div>
+                  {% else %}
+                    <div class="desk-actions">
+                      <a href="{{ url_for('edit_session', session_id=session.id) }}" class="btn btn-outline-guild btn-sm">Edit</a>
+                      <form method="POST" action="{{ url_for('cancel_session', session_id=session.id) }}">
+                        <button type="submit" class="btn btn-danger-quiet btn-sm">Cancel</button>
+                      </form>
+                    </div>
+                  {% endif %}
+                </td>
+              </tr>
+              {% set participants = participants_by_session_id[session.id] %}
+              {% if participants %}
+              <tr>
+                <td colspan="5" class="pt-0">
+                  <span class="form-hint">Participants: </span>
+                  {% for pt in participants %}
+                    <a href="{{ url_for('user_profile', user_id=pt.adventurer_id) }}" class="link-muted text-sm">
+                      {{ pt.name }} {{ pt.surname }} ({{ pt.role_name }})</a>
+                    {% if pt.companion_name %}
+                      <span class="text-sm"> + {{ pt.companion_name }} {{ pt.companion_surname }} ({{ pt.companion_role_name }})</span>
+                    {% endif %}{% if not loop.last %}, {% endif %}
+                  {% endfor %}
+                </td>
+              </tr>
+              {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+          <p class="form-hint mt-3">No sessions scheduled for this quest yet.</p>
+        {% endif %}
+      </div>
+    </article>
+  {% endfor %}
+{% else %}
+<div class="empty-state">
+  <div class="empty-state__icon">📜</div>
+  <h3 class="empty-state__title">No quests created yet</h3>
+  <p class="empty-state__text">Create your first quest to start building this week's program.</p>
+  <a href="{{ url_for('new_quest') }}" class="btn btn-accent">+ New Quest</a>
+</div>
+{% endif %}
+{% endblock %}
